@@ -1,0 +1,99 @@
+// rofi theme - Nord
+// Palette: nord0 #2E3440 · nord1 #3B4252 · nord3 #4C566A · nord8 #88C0D0
+
+* {
+    background-color:  #2e3440F0;
+    text-color:        #d8dee9;
+    border-color:      #4c566a;
+    font:              "Ubuntu Sans 11";
+}
+
+window {
+    width:              600px;
+    location:           center;
+    x-offset:           0;
+    y-offset:           0;
+    border:             2px;
+    border-color:       #4c566a;
+    border-radius:      8px;
+    /* No window padding: frame band = border only, matching the 2px borders
+       Hyprland draws around panes (hypr/40-looknfeel.conf general.border_size). */
+    padding:            0px;
+}
+
+mainbox {
+    children:           [ inputbar, listview ];
+    spacing:            10px;
+}
+
+inputbar {
+    children:           [ prompt, entry ];
+    spacing:            10px;
+    background-color:   #3b4252;
+    border-radius:      6px;
+    /* Same bordering and spacing as the list rows: 2px border (the
+       search box is the popup's active element, so it carries the blue
+       active-border look), ~0.5em inner padding at font size 11. */
+    padding:            7px;
+    border:             2px;
+    border-color:       #5e81ac;
+    text-color:         #88c0d0;
+}
+
+prompt {
+    /* Same tone as the inputbar itself, so the label sits directly on
+       the bar with no stray box (inherited alpha would blend darker). */
+    background-color:   #3b4252;
+}
+
+entry {
+    placeholder:        "Search…";
+    placeholder-color:  #4c566a;
+    blink:              true;
+    text-color:         #eceff4;
+    /* The entry paints its own field; its edge would render as a
+       foreign gray hairline otherwise, so the border is drawn
+       explicitly in the field's own tone. */
+    background-color:   #3b4353;
+    border:             2px;
+    border-color:       #3b4353;
+    border-radius:      6px;
+}
+
+listview {
+    lines:              10;
+    fixed-height:       false;
+    scrollbar:          false;
+    spacing:            4px;
+}
+
+element {
+    /* Every row reserves the same outline geometry (2px transparent
+       border, ~0.5em inner padding at font size 11) so the layout does
+       not shift between selected and unselected states.
+       spacing keeps icon and text widgets apart; when they touch they
+       render a vertical seam line between icon and name. */
+    padding:            7px;
+    spacing:            14px;   /* ~1em at font size 11 */
+    border:             2px;
+    border-color:       transparent;
+    border-radius:      6px;
+}
+
+element-text {
+    text-color:         #d8dee9;
+    vertical-align:     0.5;
+}
+
+element selected {
+    /* Thin blue outline only, like the pane borders; no filled pill, so
+       the icon-text spacing keeps the row background instead of floating
+       as a blue bar between icon and label. */
+    background-color:   transparent;
+    border-color:       #5e81ac;
+}
+
+element-text selected {
+    text-color:         #eceff4;
+    font-weight:        bold;
+}

@@ -1,0 +1,12 @@
+*~
+
+# Python byte-code and tool caches (scripts/*.py)
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/

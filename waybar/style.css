@@ -1,0 +1,119 @@
+/* waybar stylesheet - Nord
+ * Palette: nord0 #2E3440 · nord1 #3B4252 · nord3 #4C566A · nord10 #5E81AC
+ *          nord8 #88C0D0 · nord11 #BF616A · nord14 #A3BE8C */
+
+* {
+    /* The Nerd Font must be named explicitly: the widget glyphs (\uF0xx-…,
+     * see config.jsonc) are not in Ubuntu Sans / sans-serif, so Pango falls
+     * back per codepoint — and lands on any font that squats the private-use
+     * range (Gentium/Andika do; verified UnBatang, Weather Icons, octicons
+     * too), not on a Nerd Font. Missing Hasklug degrades to tofu, not wrong
+     * icons. Same family the powermenu's rofi theme-str names. */
+    font-family: "Ubuntu Sans", "Hasklug Nerd Font", sans-serif;
+    font-size: 13px;
+}
+
+@define-color background #2e3440;
+@define-color foreground #d8dee9;
+
+window#waybar {
+    background-color: @background;
+    color: @foreground;
+    /* match the panes: decoration.rounding; the inset margins live in
+       config.jsonc (layer-surface margins), GTK ignored the CSS ones */
+    border-radius: 8px;
+}
+
+window#waybar.hidden {
+    opacity: 0.2;
+}
+
+#workspaces {
+    margin: 3px 4px;
+    background-color: #3b4252;
+    border-radius: 6px;
+}
+
+#workspaces button {
+    margin: 2px 3px;
+    padding: 0 4px;
+    color: #d8dee9;
+    transition: color 0.2s;
+}
+
+#workspaces button.active {
+    color: #88c0d0;
+    font-weight: bold;
+}
+
+#workspaces button.urgent {
+    color: #bf616a;
+}
+
+#window {
+    margin: 3px 4px;
+    padding: 0 10px;
+    color: #eceff4;
+}
+
+#clock,
+#custom-date {
+    margin: 3px 4px;
+    padding: 0 12px;
+    background-color: #3b4252;
+    border-radius: 6px;
+    color: #eceff4;
+}
+
+#tray,
+#language,
+#pulseaudio,
+#bluetooth,
+#network,
+#battery,
+#custom-media,
+#custom-power {
+    margin: 3px 2px;
+    padding: 0 8px;
+    color: #d8dee9;
+}
+
+#battery {
+    color: #a3be8c;
+}
+
+#custom-power {
+    color: #bf616a;
+}
+
+#battery.charging,
+#battery.plugged {
+    color: #ebcb8b;
+}
+
+#battery.warning {
+    color: #d08770;
+}
+
+#battery.critical:not(.charging) {
+    color: #bf616a;
+    animation: blink 1s steps(2) infinite alternate;
+}
+
+#pulseaudio.muted {
+    color: #4c566a;
+}
+
+#network.disconnected {
+    color: #bf616a;
+}
+
+#bluetooth.disabled {
+    color: #4c566a;
+}
+
+@keyframes blink {
+    to {
+        color: #eceff4;
+    }
+}

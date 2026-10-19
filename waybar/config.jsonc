@@ -1,0 +1,161 @@
+{
+    "layer": "top",
+    "position": "top",
+    "height": 36,
+    "reload_style_on_change": true,
+    // match the panes: general.gaps_out on the sides and below the bar
+    "margin-left": 10,
+    "margin-right": 10,
+    "margin-top": 6,
+    "margin-bottom": 0,
+
+    "modules-left": [
+        "hyprland/workspaces",
+        "custom/media",
+        "hyprland/window"
+    ],
+    "modules-center": [
+        "custom/date"
+    ],
+    "modules-right": [
+        "tray",
+        "hyprland/language",
+        "pulseaudio",
+        "bluetooth",
+        "network",
+        "battery",
+        "custom/power"
+    ],
+
+    "hyprland/workspaces": {
+        "format": "{icon}",
+        "format-icons": {
+            "default": "●",
+            "active": "◉",
+            "urgent": "○"
+        },
+        "on-click": "activate",
+        "on-scroll-up": "hyprctl dispatch workspace e-1",
+        "on-scroll-down": "hyprctl dispatch workspace e+1",
+        "sort-by-number": true
+    },
+
+    "hyprland/window": {
+        "max-length": 50,
+        "separate-outputs": true
+    },
+
+    // Widget glyphs are Nerd Font codepoints written as \uXXXX escapes
+    // (same trick as the powermenu rows): Ubuntu Sans has none of these,
+    // so they resolve through the next family of style.css's stack — an
+    // installed Nerd Font must be named there (see its comment: unlisted,
+    // per-codepoint fallback lands on PUA squatters like Gentium/Andika).
+    // Each glyph sits one em from its label as U+2003 (em space, 13px at
+    // the bar's 13px font): a plain space is only ~1/4 em, too tight.
+    "hyprland/language": {
+        // Nerd Font: keyboard. {variant} is empty for plain us, "intl" for
+        // the dead-key state \u2014 the only placeholder that tells the two apart
+        // ({short} is "us" for both; same XKB layout, two variants).
+        "format": "<span foreground=\"#81a1c1\">\uf11c</span>\u2003{short} <span foreground=\"#81a1c1\">{variant}</span>",
+        "on-click": "hyprctl switchxkblayout current next"
+    },
+
+    // The strftime clock module errors on this build with extended %-tokens;
+    // a scripted custom module takes its place, with a 3-month calendar.
+    // Hover tooltip is dead on waybar 0.15.0-1 (cannot show tooltips,
+    // Alexays/Waybar#4917), so the calendar opens as a click popup instead;
+    // the tooltip JSON stays for when the bar gets a fixed build.
+    "custom/date": {
+        "format": "{}",
+        "return-type": "json",
+        "interval": 5,
+        "exec": "$HOME/.config/hypr/scripts/datebar.sh",
+        "on-click": "$HOME/.config/hypr/scripts/calendar-popup.sh"
+    },
+
+    "custom/media": {
+        "format": "{icon} {}",
+        "return-type": "json",
+        "format-icons": { "default": "♪" },
+        "max-length": 40,
+        "interval": 2,
+        "exec": "$HOME/.config/hypr/scripts/mediabar.sh",
+        "on-click": "playerctl play-pause",
+        "on-scroll-up": "playerctl next",
+        "on-scroll-down": "playerctl previous"
+    },
+
+    // Static session widget; opening the menu is the on-click action.
+    // No explicit "interval": 0 — waybar 0.15.0 floors it to 1ms and
+    // busy-loops, starving the GTK event loop and killing every tooltip
+    // bar-wide (Alexays/Waybar#4917). Unset means: run once, then only
+    // on signal — which is what a static widget wants.
+    "custom/power": {
+        "format": "{}",
+        "return-type": "json",
+        "exec": "$HOME/.config/hypr/scripts/powerbar.sh",
+        "on-click": "$HOME/.config/hypr/scripts/powermenu.sh"
+    },
+
+    "tray": {
+        "icon-size": 18,
+        "spacing": 8
+    },
+
+    "pulseaudio": {
+        "format": "{icon}\u2003{volume}",
+        // Nerd Font: volume high, volume off (muted keeps the strike)
+        "format-muted": "<s>\uf026</s>",
+        "format-icons": { "default": "\uf028" },
+        "tooltip-format": "{desc}: {volume}%",
+        "on-click": "pavucontrol"
+    },
+
+    "bluetooth": {
+        // KDE-style: rune always visible, dimmed by #bluetooth.disabled in
+        // style.css when the controller is off/rfkill-blocked (this machine's
+        // soft-blocked hci0 lands here, per waybar's warning below); only
+        // truly absent hardware takes format-no-controller and hides, as
+        // GNOME does. b-rune + count once a device connects.
+        // Nerd Font f294 = clean bluetooth-b rune (f293 draws an ugly
+        // badge-dot); dead tooltips kept for a fixed waybar build (0.15.0).
+        "format": "\uf294",
+        "format-off": "\uf294",
+        "format-disabled": "\uf294",
+        "format-on": "\uf294",
+        "format-connected": "\uf294\u2003{num_connections}",
+        "format-no-controller": "",
+        "tooltip-format": "{controller_alias}\t{controller_address}",
+        "tooltip-format-connected": "{device_alias}: {device_battery_percentage}%",
+        "on-click": "blueman-manager"
+    },
+
+    "network": {
+        "interface": "wlp2s0",
+        // Nerd Font: wifi, ethernet, warning triangle
+        "format-wifi": "\uf1eb\u2003{essid}",
+        "format-ethernet": "\uf200\u2003wired",
+        "format-linked": "\uf200\u2003no-ip",
+        "format-disconnected": "\uf071\u2003offline",
+        "tooltip-format": "{ipaddr}/{cidr}\nbitrate: {bandwidthDownBits}",
+        "on-click": "nm-connection-editor"
+    },
+
+    "battery": {
+        "interval": 30,
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{icon}\u2003{capacity}%",
+        // Nerd Font: bolt, plug, empty..full batteries (FA f244-f240)
+        "format-charging": "\uf0e7\u2003{capacity}%",
+        "format-plugged": "\uf1e6",
+        "format-icons": [
+            "\uf244", "\uf244", "\uf243", "\uf243", "\uf242",
+            "\uf242", "\uf242", "\uf241", "\uf241", "\uf240"
+        ],
+        "format-time": "{H}h{M}m",
+        "tooltip-format": "{timeTo} ({capacity}%)"
+    }
+}

@@ -1,0 +1,13 @@
+// rofi configuration - Nord
+configuration {
+    modes: "drun,run,window";
+    show-icons: true;
+    icon-theme: "Nordzy";
+    font: "Ubuntu Sans 11";
+    display-drun: "Apps";
+    display-run: "Run";
+    display-window: "Windows";
+    drun-display-format: "{name}";
+}
+
+@theme "nord"

@@ -1,0 +1,232 @@
+# -*- org -*-
+#+TITLE:      Hyprland desktop environment
+#+AUTHOR:     Diacus Magnuz
+#+DATE:       2026-10-16
+#+STARTUP: overview
+
+A reproducible, Nord-themed desktop environment built around [[https://hypr.land/][Hyprland]].
+System-agnostic by design: the only requirements are a Linux machine, the
+Wayland stack and Hyprland installed. The whole configuration lives in this
+repository, wherever it is cloned; =scripts/install.sh= installs it into
+=~/.config= as *regular files* — the deployed settings are real copies, not
+symlinks, so the desktop keeps working however the repository moves, and the
+installed config references only that path.
+
+* Repository layout
+
+#+begin_example
+├── hypr/                       compositor + lock/idle/wallpaper daemons
+│   ├── hyprland.conf           entry point, sources the modules below
+│   ├── 00-variables.conf       programs, Nord colour palette
+│   ├── 10-monitors.conf        monitor + persistent workspace setup
+│   ├── 20-env.conf             environment variables
+│   ├── 30-input.conf           keyboard/trackpad (MacBook specifics)
+│   ├── 40-looknfeel.conf       gaps, borders, Nord colours, animations
+│   ├── 50-keybinds.conf        all keybindings
+│   ├── 60-autostart.conf       daemons started with the session
+│   ├── 70-windows.conf         window rules
+│   ├── hyprlock.conf           screen locker
+│   ├── hypridle.conf           idle: dim -> DPMS off -> suspend
+│   └── hyprpaper.conf          wallpaper
+├── waybar/                     status bar (config + Nord stylesheet)
+├── rofi/                       launcher + window switcher (Nord theme)
+├── dunst/                      notification daemon
+├── scripts/
+│   ├── screenshot.sh           area/full/window -> Pictures/Screenshots
+│   ├── datebar.sh              calendar widget data for waybar
+│   ├── mediabar.sh             media widget data for waybar
+│   ├── powerbar.sh             session widget data for waybar
+│   ├── powermenu.sh            rofi session menu (lock/logout/suspend/…)
+│   ├── wallpaper.sh            hyprpaper IPC helper
+│   ├── live-test.sh            nested-session live test (throwaway HOME)
+│   └── install.sh              install into ~/.config (idempotent)
+└── wallpapers/                 generated Nord gradient (replace at will)
+#+end_example
+
+=install.sh= copies the settings into =~/.config= (the repository itself is
+the source of truth): rerun it after editing the repo to apply changes, and
+port any tweaks made directly in =~/.config= back here — the next install
+*overwrites* them; only the original pre-repo file is backed up once, as
+=name.rp-original=.
+
+* Deploy
+
+#+begin_src bash :results none
+bash scripts/install.sh
+#+end_src
+
+Then log out of GNOME and pick the *Hyprland* session at the login screen.
+
+* Packages
+
+Hyprland must already be installed. Everything else, under the names used by
+Debian/Ubuntu (adapt the package names to your distribution):
+
+#+begin_src bash :results none
+sudo apt install hyprlock hypridle hyprpaper hyprpolkitagent waybar dunst rofi \
+  grim slurp brightnessctl playerctl pamixer blueman network-manager-gnome qt6ct \
+  hyprland-qtutils bsdmainutils dex
+#+end_src
+
+=hyprland-qtutils= provides =hyprland-dialog= (the ANR-manager dialog); without
+it Hyprland pops two "missing" notifications on every start. =bsdmainutils=
+provides =cal= (the calendar tooltip works without it, via a python fallback).
+=dex= runs XDG autostart entries from =~/.config/autostart= (the same
+mechanism GNOME uses), so per-app autostart settings carry over between
+sessions without a config change.
+
+The session-menu icons (powermenu.sh) are Nerd Font glyphs rendered as *text*,
+not rofi image icons: rofi 2.0's async image-icon fetcher drops most icon
+paints on Wayland (upstream #2322/#2165). Any Nerd Fonts build that carries the
+Font Awesome block works — =Hasklug Nerd Font= (from the Emacs all-the-icons
+fonts) is what =scripts/powermenu.sh= names as the fallback family. Without it
+the menu degrades to name-only rows.
+Nested test runs also legitimately bypass =start-hyprland= (which a real GDM
+
+* Testing without logging out
+
+Like Awesome WM used to, Hyprland can run *nested* inside the current desktop
+session: launched from a terminal, it detects =WAYLAND_DISPLAY=, skips the
+DRM/KMS backend, and opens as an application window (virtual output
+=WAYLAND-1=) with the full compositor running inside.
+
+The =scripts/live-test.sh= wrapper makes the test fully isolated: it creates a
+throwaway directory, installs the settings into its =$HOME= the same way
+=install.sh= does, and launches Hyprland with HOME and the XDG dirs pointing
+at it. The real =~/.config= is never touched, and the throwaway tree is
+removed when the test session ends.
+Hyprland's own log dies with the instance, so console output is captured into
+a log file in the tree; on a crash the last 30 lines are printed and a copy is
+kept at =/tmp/hyprlive-last.log=. The script also lints with
+=--verify-config= before launching; passing =--verify-config= through runs the
+check only, with the verdict on the terminal.
+
+#+begin_src bash :results none
+bash scripts/live-test.sh             # isolated nested test, auto-cleanup
+bash scripts/live-test.sh --keep      # keep the throwaway tree for post-mortem
+bash scripts/live-test.sh --verify-config   # config check only, prints here
+#+end_src
+
+Note the tested settings are the /snapshot/ =install.sh= took at launch, so
+files edited in this repo while the test runs do not propagate; rerun for a
+fresh copy.
+
+To deploy to the real home instead, run =bash scripts/install.sh=.
+
+Caveats when nested:
+
+- *The Super key may be swallowed by GNOME.* Mutter grabs it for the overview,
+  so ~Super+D~ etc. can fail to reach the nested compositor. If bindings feel
+  dead, temporarily set =$mainMod = ALT= in =hypr/00-variables.conf= for the
+  test and revert afterwards.
+- *The DBus session bus is shared with GNOME:* =org.freedesktop.Notifications=
+  is owned by gnome-shell, so dunst stays down and nm-applet/blueman-applet
+  complain about duplicates. Harmless for testing the shell itself. For a fully
+  isolated session (dunst running, own portals) launch with a private bus:
+  =dbus-run-session -- Hyprland=.
+- Running =hyprctl=, =hyprlock= or the screenshot script from terminals inside
+  the nested session targets the nested instance.
+- The nested window is small on the HiDPI panel;
+  =monitor = ,preferred,auto,auto= picks a sensible scale for the virtual
+  output, and the wallpaper wildcard applies as usual.
+- Not everything translates: fractional-scale rendering, DPMS, brightness keys
+  and lid/idle behaviour are only faithful in a real KMS session. Test those on
+  a real login eventually.
+- Fallback if nesting misbehaves: Ctrl+Alt+F3 to a spare TTY, log in, and run
+  =Hyprland= there; the GNOME session stays alive on another VT.
+
+* Theming
+
+GNOME and Hyprland share the dconf database: under Hyprland the
+xdg-desktop-portal serves it (gtk-theme, icon-theme, color-scheme, cursor),
+so GTK apps get the user's existing theme in a Hyprland session with no
+additional configuration. Never write dconf/gsettings or
+=~/.config/gtk-*/settings.ini= from this project — the shared settings belong
+to the GNOME setup. Cursor is pinned with session-scoped environment
+variables in =hypr/20-env.conf= (Adwaita); Nord-flavored cursors, if wanted,
+install additively into =~/.icons=. Qt apps follow =qt6ct=, which this
+project only activates inside Hyprland sessions.
+
+* Wallpaper
+
+The wallpaper is not in any repo config: each host sets its own.
+
+** Design
+
+- =scripts/wallpaper.sh= applies the wallpaper at session start through
+  hyprpaper's IPC (=hyprctl hyprpaper wallpaper ',<path>,cover'= — empty
+  monitor meaning every output), waiting for the daemon socket first. It
+  works from a bare shell too: without the compositor env it discovers the
+  newest running Hyprland instance.
+- The daemon's config (=hypr/hyprpaper.conf=) keeps only =splash= and
+  =ipc=; no image lives in the repo's reach.
+- The image path is host data, held in =~/.config/hypr/local.conf= — a file
+  created *once* by =install.sh= from a template and never touched by
+  the repo afterwards. It is sourced at the end of =hyprland.conf=.
+- Precedence in =wallpaper.sh=: =HYPRLAND_WALLPAPER_PATH= environment →
+  =env = HYPRLAND_WALLPAPER_PATH,…= line in =local.conf= → the Nord gradient
+  in =wallpapers/=. A =~/-prefixed path from =local.conf= is expanded by the
+  script, since the shell does not expand =~= inside variable values.
+
+** Changing the wallpaper
+
+1. Edit =~/.config/hypr/local.conf=: uncomment and set
+
+#+begin_src conf
+env = HYPRLAND_WALLPAPER_PATH,/path/to/your/wallpaper.jpg
+#+end_src
+
+2. Apply:
+
+#+begin_src bash :results none
+scripts/wallpaper.sh
+#+end_src
+
+The new value is also used automatically at every session start after that.
+A one-off swap without touching local.conf:
+
+#+begin_src bash :results none
+HYPRLAND_WALLPAPER_PATH=/some/other.jpg scripts/wallpaper.sh
+#+end_src
+
+* Host notes (example host: MacBook Pro 13" 2017)
+
+The 2017 MacBook exposes its keyboard and trackpad over Apple's SPI bus, which
+libinput does not mark as *internal* by default — and only internal keyboards
+pair with the touchpad for disable-while-typing. Without this, the Hyprland
+setting ~input:touchpad: disable_while_typing~ parses but does nothing, and
+palm contact while typing moves the cursor.
+
+Fix: =/etc/libinput/local-overrides.quirks= (needs sudo, then reboot):
+
+#+begin_src conf :results none
+[Apple SPI Keyboard Internal]
+MatchName=Apple SPI Keyboard
+MatchUdevType=keyboard
+AttrKeyboardIntegration=internal
+#+end_src
+
+Live test of the device names: `hyprctl devices` (here: =apple-spi-keyboard=,
+=apple-spi-touchpad=).
+
+On this HiDPI panel (scale 1.67), X11 builds of apps look pixelated: XWayland
+clients cannot fractional-scale. Prefer native Wayland builds of your
+applications where they exist. For remaining X11 apps the compositor renders
+them 1:1 (=xwayland:force_zero_scaling=), crisp but 1x-sized; compensate per
+app (e.g. GDK_DPI_SCALE) if needed.
+
+* Keybindings
+
+#+caption: short list; the complete set is in hypr/50-keybinds.conf
+| Keys                        | Action                        |
+|-----------------------------+-------------------------------|
+| Super+Return / Super+E      | terminal / file manager       |
+| Super+D / Super+Tab         | launcher / running apps       |
+| Super+1..0                  | workspace (Shift moves a win) |
+| Super+Q / Super+F / Super+V | kill / fullscreen / float     |
+| Super+S                     | scratchpad                    |
+| Super+L / Super+Shift+M     | lock / exit session           |
+| Super+Shift+E               | session menu (or bar ⏻ pill)  |
+| Print / Shift+Print         | screenshot area / full        |
+| volume, brightness, media   | laptop keys as printed        |
+| bar ⇤ keyboard widget       | swap us / us-intl (dead keys) |

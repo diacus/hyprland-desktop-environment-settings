@@ -1,0 +1,46 @@
+# Dunst - notification daemon, Nord colours
+# See https://wiki.archlinux.org/title/Dunst
+
+[global]
+    # Geometry: 300px wide, auto height, top-right under the waybar
+    origin = top-right
+    offset = (10, 40)
+    width = 300
+    height = (0, 110)
+    notification_limit = 4
+    gap_size = 8
+
+    padding = 12
+    horizontal_padding = 12
+    frame_width = 2
+    frame_color = "#4c566a"
+    corner_radius = 8
+    separator_color = frame
+
+    font = Ubuntu Sans 11
+    icon_theme = Nordzy
+    show_age_threshold = 60
+    sort = yes
+    shrink = no
+    idle_threshold = 120
+    monitor = 0
+    follow = mouse
+
+    history_length = 20
+    sticky_history = yes
+
+[urgency_low]
+    background = "#3b4252"
+    foreground = "#d8dee9"
+    timeout = 8
+
+[urgency_normal]
+    background = "#3b4252"
+    foreground = "#eceff4"
+    timeout = 10
+
+[urgency_critical]
+    background = "#bf616a"
+    foreground = "#2e3440"
+    frame_color = "#bf616a"
+    timeout = 0
