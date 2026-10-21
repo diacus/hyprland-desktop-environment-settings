@@ -108,7 +108,8 @@
         "format-muted": "<s>\uf026</s>",
         "format-icons": { "default": "\uf028" },
         "tooltip-format": "{desc}: {volume}%",
-        "on-click": "pavucontrol"
+        "on-click": "$HOME/.config/hypr/scripts/volume-popup.sh",
+        "on-click-right": "pavucontrol"
     },
 
     "bluetooth": {
@@ -127,18 +128,19 @@
         "format-no-controller": "",
         "tooltip-format": "{controller_alias}\t{controller_address}",
         "tooltip-format-connected": "{device_alias}: {device_battery_percentage}%",
-        "on-click": "blueman-manager"
+        "on-click": "$HOME/.config/hypr/scripts/bluetooth-menu.sh",
+        "on-click-right": "blueman-manager"
     },
 
     "network": {
-        "interface": "wlp2s0",
         // Nerd Font: wifi, ethernet, warning triangle
         "format-wifi": "\uf1eb\u2003{essid}",
         "format-ethernet": "\uf200\u2003wired",
         "format-linked": "\uf200\u2003no-ip",
         "format-disconnected": "\uf071\u2003offline",
         "tooltip-format": "{ipaddr}/{cidr}\nbitrate: {bandwidthDownBits}",
-        "on-click": "nm-connection-editor"
+        "on-click": "$HOME/.config/hypr/scripts/network-menu.sh",
+        "on-click-right": "nm-connection-editor"
     },
 
     "battery": {

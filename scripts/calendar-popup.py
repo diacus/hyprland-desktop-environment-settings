@@ -26,20 +26,27 @@ from gi.repository import Gdk, GLib, Gtk
 BAR_BOTTOM = 42
 GAP = 8
 
-CSS = b"""
-#calwin {
-    background-color: rgba(46, 52, 64, 0.96);
-    border: 2px solid #4c566a;
-    border-radius: 8px;
-    padding: 12px;
-}
-#calwin label {
-    color: #d8dee9;
-    font-family: "Ubuntu Sans";
-    font-size: 12px;
-    padding: 4px;
-}
-"""
+# Theme data: the one-line theme file (~/.config/hypr/theme) names the
+# active theme, whose data lives in ~/.config/hypr/themes/<name>/ —
+# widgets carry no colors (the global setting is owned by the deploy).
+CONF_ROOT = os.path.join(os.path.expanduser('~'), '.config', 'hypr')
+
+def load_css():
+    """Theme data of the active theme, or b'' (warn + unstyled) if absent."""
+    try:
+        with open(os.path.join(CONF_ROOT, 'theme')) as fh:
+            theme = fh.readline().strip()
+    except OSError as err:
+        sys.stderr.write(f'warning: theme file missing ({err})\n'
+                         'rendering unstyled\n')
+        return b''
+    path = os.path.join(CONF_ROOT, 'themes', theme, 'popup-style.css')
+    try:
+        with open(path, 'rb') as fh:
+            return fh.read()
+    except OSError:
+        sys.stderr.write(f'warning: {path} missing, rendering unstyled\n')
+        return b''
 
 
 def calendar_markup():
@@ -58,8 +65,8 @@ def calendar_markup():
     # columns over the board's max width: render it in <tt> at the same
     # font size, or the scaled pad spaces shift it off-center (a size
     # override on the header is what broke centering here)
-    return (f'<tt><span foreground="#88c0d0"><b>{hdr}</b></span></tt>\n\n'
-            f'<tt>{cal}</tt>')
+    # color comes from the theme's .popup .header rule, not markup
+    return f'<b>{hdr}</b>\n\n<tt>{cal}</tt>'
 
 
 class CalendarWindow(Gtk.Window):
@@ -70,14 +77,26 @@ class CalendarWindow(Gtk.Window):
         self.set_decorated(False)
         self.set_resizable(False)
         self.set_name('calwin')
-        # rounded corners need an alpha visual before anything is drawn
+        self.get_style_context().add_class('popup')
+        self.set_border_width(12) # 1em-ish inner padding (like volume-popup)
+        # rounded corners need an alpha visual before anything is drawn;
+        # keep the app un-paintable so GTK paints the CSS window bg (see
+        # transparent_window() in volume-popup.py for why)
         visual = self.get_screen().get_rgba_visual()
         if visual and self.get_screen().is_composited():
             self.set_visual(visual)
-            self.set_app_paintable(True)
-        label = Gtk.Label()
-        label.set_markup(markup)
-        self.add(label)
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        header, board = markup.split('\n\n', 1)
+        # the headline colors through the theme's .popup .header rule
+        head_label = Gtk.Label()
+        head_label.set_markup(header)
+        head_label.set_halign(Gtk.Align.CENTER)
+        head_label.get_style_context().add_class('header')
+        board_label = Gtk.Label()
+        board_label.set_markup(board)
+        box.pack_start(head_label, False, False, 0)
+        box.pack_start(board_label, False, False, 0)
+        self.add(box)
 
         self.connect('key-press-event', self.on_key)
         self.connect('focus-out-event', lambda *_: Gtk.main_quit())
@@ -113,7 +132,7 @@ def main():
     GLib.set_prgname('calendar-popup')
     win = CalendarWindow(calendar_markup())
     provider = Gtk.CssProvider()
-    provider.load_from_data(CSS)
+    provider.load_from_data(load_css())
     Gtk.StyleContext.add_provider_for_screen(
         Gdk.Screen.get_default(), provider,
         Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
