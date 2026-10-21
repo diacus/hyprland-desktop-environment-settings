@@ -28,15 +28,25 @@ installed config references only that path.
 │   ├── hyprlock.conf           screen locker
 │   ├── hypridle.conf           idle: dim -> DPMS off -> suspend
 │   └── hyprpaper.conf          wallpaper
-├── waybar/                     status bar (config + Nord stylesheet)
-├── rofi/                       launcher + window switcher (Nord theme)
+├── waybar/                     status bar config (stylesheet is theme data)
+├── rofi/                       launcher + window switcher (theme rasi from themes/)
 ├── dunst/                      notification daemon
+├── theme                       one line: the active theme name
+├── themes/
+│   └── nord/                   the one theme so far
+│       ├── popup-style.css     Nord theme for the GTK popups (data)
+│       ├── waybar.css          Nord theme for the bar (data)
+│       └── rofi.rasi           Nord theme for rofi menus (data)
 ├── scripts/
 │   ├── screenshot.sh           area/full/window -> Pictures/Screenshots
 │   ├── datebar.sh              calendar widget data for waybar
 │   ├── mediabar.sh             media widget data for waybar
 │   ├── powerbar.sh             session widget data for waybar
 │   ├── powermenu.sh            rofi session menu (lock/logout/suspend/…)
+│   ├── volume-popup.sh|py      volume slider panel + XF86 keys OSD
+│   ├── volume-mic-osd.sh       mic-mute notification for the keybind
+│   ├── network-menu.sh         rofi Wi-Fi picker (waybar network click)
+│   ├── bluetooth-menu.sh       rofi Bluetooth picker (waybar bt click)
 │   ├── wallpaper.sh            hyprpaper IPC helper
 │   ├── live-test.sh            nested-session live test (throwaway HOME)
 │   └── install.sh              install into ~/.config (idempotent)
@@ -57,6 +67,19 @@ bash scripts/install.sh
 
 Then log out of GNOME and pick the *Hyprland* session at the login screen.
 
+* Theming
+
+The active theme is the one-line =theme= file at the repo root (=nord=
+today); its data lives in =themes/<name>/=, as files the consumers read
+directly: =popup-style.css= for the GTK popups, =waybar.css= for the bar,
+=rofi.rasi= for the rofi menus. The deploy copies the whole themes tree to
+=~/.config/hypr/themes/=, leaves a =theme= marker next to it for the
+runtime-resolving widget scripts, and places copies of the active theme in
+the fixed slots the single-file consumers read (waybar, rofi). Widget code
+carries no colors. Switching theme: edit =theme=, rerun =install.sh=.
+dunst and Hyprland keep their colors inside their own configs (theme files
+for them land there when a second theme arrives).
+
 * Packages
 
 Hyprland must already be installed. Everything else, under the names used by
@@ -65,15 +88,17 @@ Debian/Ubuntu (adapt the package names to your distribution):
 #+begin_src bash :results none
 sudo apt install hyprlock hypridle hyprpaper hyprpolkitagent waybar dunst rofi \
   grim slurp brightnessctl playerctl pamixer blueman network-manager-gnome qt6ct \
-  hyprland-qtutils bsdmainutils dex
+  hyprland-qtutils bsdmainutils dex wireplumber
 #+end_src
 
 =hyprland-qtutils= provides =hyprland-dialog= (the ANR-manager dialog); without
 it Hyprland pops two "missing" notifications on every start. =bsdmainutils=
 provides =cal= (the calendar tooltip works without it, via a python fallback).
-=dex= runs XDG autostart entries from =~/.config/autostart= (the same
-mechanism GNOME uses), so per-app autostart settings carry over between
-sessions without a config change.
+=wireplumber= provides =wpctl= — the output switcher and per-app stream sliders
+in the volume panel (pamixer only reaches the default sink). =dex= runs XDG
+autostart entries from =~/.config/autostart= (the same mechanism GNOME uses),
+so per-app autostart settings carry over between sessions without a config
+change.
 
 The session-menu icons (powermenu.sh) are Nerd Font glyphs rendered as *text*,
 not rofi image icons: rofi 2.0's async image-icon fetcher drops most icon
@@ -135,7 +160,7 @@ Caveats when nested:
 - Fallback if nesting misbehaves: Ctrl+Alt+F3 to a spare TTY, log in, and run
   =Hyprland= there; the GNOME session stays alive on another VT.
 
-* Theming
+* GTK and Qt themes (shared with GNOME)
 
 GNOME and Hyprland share the dconf database: under Hyprland the
 xdg-desktop-portal serves it (gtk-theme, icon-theme, color-scheme, cursor),
@@ -228,5 +253,6 @@ app (e.g. GDK_DPI_SCALE) if needed.
 | Super+L / Super+Shift+M     | lock / exit session           |
 | Super+Shift+E               | session menu (or bar ⏻ pill)  |
 | Print / Shift+Print         | screenshot area / full        |
-| volume, brightness, media   | laptop keys as printed        |
+| volume/brightness/media     | laptop keys; volume shows an OSD |
+| bar 🔊 📶 ᛒ                 | volume panel / Wi-Fi and Bluetooth pickers (right-click: pavucontrol / nm-connection-editor / blueman) |
 | bar ⇤ keyboard widget       | swap us / us-intl (dead keys) |
