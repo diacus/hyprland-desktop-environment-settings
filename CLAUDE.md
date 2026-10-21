@@ -65,6 +65,15 @@ apps go through the user before implementation.
   apps report a flatpak-style app-id (pavucontrol 6.x =
   `org.pulseaudio.pavucontrol`); rules with `$`-anchored bare names silently
   miss them — check `hyprctl clients` for the real class when a dialog tiles
+- This host (MBP 2017, Kaby Lake) **cannot suspend**: pm_test bisection
+  (2026-10-20) shows device suspend passes (`pm_test=devices`) but the
+  ACPI/SMC platform handoff (`pm_test=platform`, `-=processors`) wedges the
+  kernel — same for deep S3 and s2idle; journal always ends at `PM: suspend
+  entry`, panel shows quadrant test pattern. Suspend listener in
+  `hypridle.conf` commented out; sleep verbs refused system-wide via repo
+  `system/logind.conf.d/` and `system/sleep.conf.d/` `95-never-sleep.conf`
+  drop-ins (lid close locks instead). Note on this systemd 259:
+  `AllowSuspend=` lives in sleep.conf, not logind.conf
 - Submaps are not a context for scoped keybinds on 0.53: keys without a bind
   in the active submap do NOT fall back to the default map, they pass to the
   client (KeybindManager skips binds of other submaps). Per-context behavior
