@@ -1,0 +1,82 @@
+/* THEMES/nord/popup-style.css - Nord palette for the GTK popups
+   (volume panel/OSD, calendar). One file per theme under themes/<name>/;
+   the one-line `theme` file at the repo root names the active theme and
+   the deploy wires its data files into place. This file is theme data:
+   retheme or restyle the popups here without touching the widget code.
+
+   GTK CSS gotcha (see the first volume panel, 2026-10-21): do not set
+   app_paintable on these windows; with no draw handler GTK then skips
+   the CSS window background and the popup renders fully transparent.
+   Padding on a toplevel is also not honored for child allocation — the
+   inset comes from set_border_width in the code.
+*/
+
+/* --- shared popup palette (windows join the .popup class) ------------- */
+.popup label {
+    color: #d8dee9;
+    font-family: "Ubuntu Sans";
+    font-size: 12px;
+}
+.popup .header { /* calendar headline */
+    color: #88c0d0;
+    font-size: 13px;
+}
+.popup .glyph { /* Nerd Font glyphs must name the fallback explicitly */
+    font-family: "Ubuntu Sans", "Hasklug Nerd Font";
+    font-size: 18px;
+    color: #88c0d0;
+}
+.popup .glyph.muted {
+    color: #bf616a;
+}
+.popup .section {
+    font-size: 11px;
+    color: #88c0d0;
+}
+.popup scale trough {
+    background-color: #3b4252;
+    border-radius: 5px;
+}
+.popup scale highlight {
+    background-color: #88c0d0;
+    border-radius: 5px;
+}
+.popup scale slider {
+    background-color: #eceff4;
+    border-radius: 10px;
+    min-height: 20px;
+    min-width: 20px;
+}
+.popup progressbar trough {
+    background-color: #3b4252;
+    border-radius: 4px;
+    min-height: 8px;
+}
+.popup progressbar progress {
+    background-color: #88c0d0;
+    border-radius: 4px;
+    min-height: 8px;
+}
+
+/* --- window geometry, one block per popup ----------------------------- */
+
+#volpwin { /* volume-popup.py, panel mode */
+    background-color: rgba(46, 52, 64, 0.94);
+    border: 2px solid #4c566a;
+    border-radius: 8px;
+}
+
+#voosd { /* volume-popup.py, osd mode */
+    background-color: rgba(46, 52, 64, 0.94);
+    border: 2px solid #4c566a;
+    border-radius: 8px;
+}
+#voosd .glyph { /* the OSD is a bigger surface than the panel row */
+    font-size: 22px;
+}
+
+#calwin { /* calendar-popup.py */
+    background-color: rgba(46, 52, 64, 0.94);
+    border: 2px solid #4c566a;
+    border-radius: 8px;
+}

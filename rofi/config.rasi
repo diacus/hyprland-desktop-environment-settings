@@ -10,4 +10,4 @@ configuration {
     drun-display-format: "{name}";
 }
 
-@theme "nord"
+@theme "theme"
