@@ -71,7 +71,11 @@ radio="$(nmcli radio wifi 2>/dev/null)" # enabled / disabled
 
 types=() labels=() glyphs=() net_ssid=() net_sec=() net_inuse=()
 if [[ "$radio" == enabled ]]; then
+# net_ssid/net_sec reserve an empty slot per non-network row, like the
+# bluetooth menu's devs array, so net_ssid[choice] stays index-aligned
+# with types[choice] (rofi dispatches by row index).
     glyphs+=($''); labels+=('Disable Wi-Fi'); types+=(toggle)
+    net_ssid+=(''); net_sec+=('')
     # background rescan: benefits the next open of this menu
     nmcli device wifi rescan >/dev/null 2>&1 &
     {
@@ -91,10 +95,13 @@ if [[ "$radio" == enabled ]]; then
         done
     }
 else
+    net_ssid+=(''); net_sec+=('')
     glyphs+=($''); labels+=('Enable Wi-Fi'); types+=(toggle)
 fi
 glyphs+=($''); labels+=('Saved networks…'); types+=(saved)
+net_ssid+=(''); net_sec+=('')
 glyphs+=($''); labels+=('Connection editor…'); types+=(editor)
+net_ssid+=(''); net_sec+=('')
 
 menu=''
 for i in "${!labels[@]}"; do

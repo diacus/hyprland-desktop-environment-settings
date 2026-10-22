@@ -136,7 +136,9 @@
         // Nerd Font: wifi, ethernet, warning triangle
         "format-wifi": "\uf1eb\u2003{essid}",
         "format-ethernet": "\uf200\u2003wired",
-        "format-linked": "\uf200\u2003no-ip",
+        // Associated but no lease yet (DHCP window after nmcli reports
+        // the connection up): the SSID is already known, keep showing it
+        "format-linked": "\uf1eb\u2003{essid}",
         "format-disconnected": "\uf071\u2003offline",
         "tooltip-format": "{ipaddr}/{cidr}\nbitrate: {bandwidthDownBits}",
         "on-click": "$HOME/.config/hypr/scripts/network-menu.sh",
