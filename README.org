@@ -253,7 +253,7 @@ app (e.g. GDK_DPI_SCALE) if needed.
 | Super+S                     | scratchpad                    |
 | Super+L / Super+Shift+M     | lock / exit session           |
 | Super+Shift+E               | session menu (or bar ⏻ pill)  |
-| Print / Shift+Print         | screenshot area / full        |
+| Print / Ctrl+Shift+3..5     | screenshots full/area/window  |
 | volume/brightness/media     | laptop keys; volume shows an OSD |
 | bar 🔊 📶 ᛒ                 | volume panel / Wi-Fi and Bluetooth pickers (right-click: pavucontrol / nm-connection-editor / blueman) |
 | bar ⇤ keyboard widget       | swap us / us-intl (dead keys) |
