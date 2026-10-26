@@ -246,7 +246,8 @@ app (e.g. GDK_DPI_SCALE) if needed.
 | Keys                        | Action                        |
 |-----------------------------+-------------------------------|
 | Super+Return / Super+E      | terminal / file manager       |
-| Super+D / Super+Tab         | launcher / running apps       |
+| Super+Space / Super+R       | launcher / run command        |
+| Super+Tab                   | running apps                  |
 | Super+1..0                  | workspace (Shift moves a win) |
 | Super+Q / Super+F / Super+V | kill / fullscreen / float     |
 | Super+S                     | scratchpad                    |
