@@ -249,9 +249,12 @@ app (e.g. GDK_DPI_SCALE) if needed.
 | Super+Space / Super+R       | launcher / run command        |
 | Super+Tab                   | running apps                  |
 | Super+1..0                  | workspace (Shift moves a win) |
-| Super+Q / Super+F / Super+V | kill / fullscreen / float     |
-| Super+S                     | scratchpad                    |
-| Super+L / Super+Shift+M     | lock / exit session           |
+| Super+Arrows / Super+HJKL   | move focus (hjkl = left/down/up/right) |
+| Super+Shift+HJKL            | move pane in that direction            |
+| Super+Q / Super+F / Super+V | kill / fullscreen / float              |
+| Super+T / Super+P           | split swap / pseudotile                |
+| Super+S                     | scratchpad                             |
+| Ctrl+Alt+L / Super+Shift+M  | lock / exit session                    |
 | Super+Shift+E               | session menu (or bar ⏻ pill)  |
 | Print / Ctrl+Shift+3..5     | screenshots full/area/window  |
 | volume/brightness/media     | laptop keys; volume shows an OSD |
